@@ -24,16 +24,18 @@ jobs:
           pip install requests loguru
           
       - name: Run Bilibili Task
-        # 这一步的名称改得更贴切
         env:
           # 必需的环境变量
           BILIBILI_COOKIE: ${{ secrets.BILIBILI_COOKIE }}
-          
+
+          # Telegram 通知
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+
           # 可选的环境变量
-          PUSH_PLUS_TOKEN: ${{ secrets.PUSH_PLUS_TOKEN }}
           TASK_CONFIG: ${{ secrets.TASK_CONFIG }}
           COIN_ADD_NUM: ${{ secrets.COIN_ADD_NUM }}
           COIN_SELECT_LIKE: ${{ secrets.COIN_SELECT_LIKE }}
           COIN_VIDEO_SOURCE: ${{ secrets.COIN_VIDEO_SOURCE }}
-          
-        run: python main.py # 修改了执行的入口文件
+
+        run: python main.py
