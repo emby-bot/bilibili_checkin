@@ -3,7 +3,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 from loguru import logger
 from bilibili import BilibiliTask
-from push import format_push_message, send_to_pushplus
+from push import format_push_message, send_to_telegram
 
 class BeijingFormatter:
     @staticmethod
@@ -103,7 +103,8 @@ def main():
     # 这样既能处理"变量不存在"的情况，也能处理"变量存在但为空"的情况。
     config = {
         "BILIBILI_COOKIE": os.environ.get('BILIBILI_COOKIE'),
-        "PUSH_PLUS_TOKEN": os.environ.get('PUSH_PLUS_TOKEN'),
+        "TG_BOT_TOKEN": os.environ.get('TG_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN'),
+        "TG_CHAT_ID": os.environ.get('TG_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID'),
         "TASK_CONFIG": os.environ.get('TASK_CONFIG') or 'live_sign,manga_sign,share_video,add_coin',
         "COIN_ADD_NUM": os.environ.get('COIN_ADD_NUM') or '1',
         "COIN_SELECT_LIKE": os.environ.get('COIN_SELECT_LIKE') or '1',
@@ -170,13 +171,13 @@ def main():
         if account_failed:
             any_failed = True
 
-    if config["PUSH_PLUS_TOKEN"] and all_results:
-        logger.info('准备发送推送通知...')
+    if config["TG_BOT_TOKEN"] and config["TG_CHAT_ID"] and all_results:
+        logger.info('准备发送 Telegram 推送通知...')
         title = "Bilibili 任务通知"
         content = format_push_message(all_results)
-        send_to_pushplus(config["PUSH_PLUS_TOKEN"], title, content)
+        send_to_telegram(config["TG_BOT_TOKEN"], config["TG_CHAT_ID"], title, content)
     else:
-        logger.info('未配置 PUSH_PLUS_TOKEN，跳过推送。')
+        logger.info('未配置 TG_BOT_TOKEN 或 TG_CHAT_ID，跳过 Telegram 推送。')
 
     # 所有账号执行完毕，统一输出最终执行结果
     if any_failed:
