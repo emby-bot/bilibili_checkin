@@ -3,7 +3,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 from loguru import logger
 from bilibili import BilibiliTask
-from push import format_push_message, send_to_telegram
+from push import format_push_message, send_to_telegram, send_to_bark
 
 class BeijingFormatter:
     @staticmethod
@@ -105,6 +105,9 @@ def main():
         "BILIBILI_COOKIE": os.environ.get('BILIBILI_COOKIE'),
         "TG_BOT_TOKEN": os.environ.get('TG_BOT_TOKEN') or os.environ.get('TELEGRAM_BOT_TOKEN'),
         "TG_CHAT_ID": os.environ.get('TG_CHAT_ID') or os.environ.get('TELEGRAM_CHAT_ID'),
+        "BARK_KEY": os.environ.get('BARK_KEY') or '',
+        "BARK_GROUP": os.environ.get('BARK_GROUP') or 'Bilibili任务',
+        "BARK_ICON": os.environ.get('BARK_ICON') or 'https://www.bilibili.com/favicon.ico',
         "TASK_CONFIG": os.environ.get('TASK_CONFIG') or 'live_sign,manga_sign,share_video,add_coin',
         "COIN_ADD_NUM": os.environ.get('COIN_ADD_NUM') or '1',
         "COIN_SELECT_LIKE": os.environ.get('COIN_SELECT_LIKE') or '1',
@@ -171,13 +174,29 @@ def main():
         if account_failed:
             any_failed = True
 
-    if config["TG_BOT_TOKEN"] and config["TG_CHAT_ID"] and all_results:
-        logger.info('准备发送 Telegram 推送通知...')
+    if all_results:
         title = "Bilibili 任务通知"
         content = format_push_message(all_results)
-        send_to_telegram(config["TG_BOT_TOKEN"], config["TG_CHAT_ID"], title, content)
+
+        if config["TG_BOT_TOKEN"] and config["TG_CHAT_ID"]:
+            logger.info('准备发送 Telegram 推送通知...')
+            send_to_telegram(config["TG_BOT_TOKEN"], config["TG_CHAT_ID"], title, content)
+        else:
+            logger.info('未配置 TG_BOT_TOKEN 或 TG_CHAT_ID，跳过 Telegram 推送。')
+
+        if config["BARK_KEY"]:
+            logger.info('准备发送 Bark 推送通知...')
+            send_to_bark(
+                config["BARK_KEY"],
+                title,
+                content,
+                config.get("BARK_GROUP"),
+                config.get("BARK_ICON"),
+            )
+        else:
+            logger.info('未配置 BARK_KEY，跳过 Bark 推送。')
     else:
-        logger.info('未配置 TG_BOT_TOKEN 或 TG_CHAT_ID，跳过 Telegram 推送。')
+        logger.info('没有可推送的任务结果，跳过所有推送。')
 
     # 所有账号执行完毕，统一输出最终执行结果
     if any_failed:
