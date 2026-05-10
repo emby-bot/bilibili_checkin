@@ -4,6 +4,11 @@ from datetime import datetime, timedelta, timezone
 from loguru import logger
 
 
+# 这些任务仍然会正常执行，只是不显示在 Telegram / Bark 通知内容里
+# 如果以后想恢复显示，删掉对应名称即可
+HIDE_PUSH_TASK_NAMES = {"直播签到", "漫画签到"}
+
+
 def format_push_message(all_results):
     content = ["📣 Bilibili 任务报告\n"]
 
@@ -21,6 +26,9 @@ def format_push_message(all_results):
             content.append(account_name)
 
         for name, (success, message) in result['tasks'].items():
+            if name in HIDE_PUSH_TASK_NAMES:
+                continue
+
             status_icon = "✅" if success else "❌"
             reason = f" - {message}" if message else ""
             content.append(f"{status_icon} {name}{reason}")
