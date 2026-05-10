@@ -13,7 +13,7 @@
 2. **支持多账号**：可在单个工作流中为多个账号执行任务；
 3. **安全可靠**：敏感信息安全传递：支持通过环境变量读取cookie；
 4. **自动化运行**：结合GitHub Actions实现自动化运行，执行日志结果清晰；
-5. **支持通过 PushPlus 推送任务运行结果**，方便及时获取通知；
+5. **支持通过 Telegram / Bark 推送任务运行结果**，方便及时获取通知；
 6. **手动触发**：(每日奖励只能领取一次，故触发多次即使执行成功结果也不会变化)。
 
 
@@ -31,6 +31,9 @@
 |---|---|---|---|
 | `BILIBILI_COOKIE` | **是** | B站Cookie。多账号用 `###` 分隔。 | 无 |
 | `PUSH_PLUS_TOKEN` | **否** | PushPlus 的 Token，用于推送通知。 | 无 |
+| `BARK_KEY` | **否** | Bark 推送地址或 Key，例如 `https://api.day.app/你的Key`。 | 无 |
+| `BARK_GROUP` | **否** | Bark 通知分组。 | `Bilibili任务` |
+| `BARK_ICON` | **否** | Bark 通知图标链接。 | `https://www.bilibili.com/favicon.ico` |
 | `TASK_CONFIG` | **否** | 任务执行控制，用逗号分隔。可选值: `live_sign`, `manga_sign`, `share_video`, `add_coin` | `live_sign,manga_sign,share_video,add_coin` |
 | `COIN_ADD_NUM` | **否** | 每日投币数量。 | `1` |
 | `COIN_SELECT_LIKE`| **否** | 投币时是否点赞。`1` 为是，`0` 为否。 | `1` |
@@ -39,6 +42,15 @@
    **多账号Cookie配置示例:**
    cookie账号1###cookie账号2###cookie账号3
    ![image](docs/images/img03.png)
+
+   **Bark配置示例:**
+   ```env
+   BARK_KEY=https://api.day.app/你的BarkKey
+   BARK_GROUP=Bilibili任务
+   BARK_ICON=https://www.bilibili.com/favicon.ico
+   ```
+
+   如果使用 GitHub Actions，请确认 workflow 的 `env` 里也把 `BARK_KEY`、`BARK_GROUP`、`BARK_ICON` 传给 Python 脚本。
 
 
 3. 启用GitHub Actions，Fork的仓库默认是关闭workflow的，需要手动开启。   
@@ -87,7 +99,7 @@
 4. 关于任务执行一致性：
 - 所有账号会严格按照`TASK_CONFIG`配置执行任务，未配置按默认执行； 
 - 即使某些任务被跳过(如未配置、硬币不足、活动下线)，也会明确打印日志，方便排查; 
-- PushPlus推送失败不影响整体任务成功，为非必需配置； 
+- Telegram / Bark 推送失败不影响整体任务成功，为非必需配置； 
 - 每个账号只要有一个登录后任务成功，则该账号整体成功；
 - 如果账号登录失败或所有任务都失败，则该账号失败；
 - 多账号时，只要有一个账号失败，整体失败；
