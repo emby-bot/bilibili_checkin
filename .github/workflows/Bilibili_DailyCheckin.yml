@@ -32,6 +32,11 @@ jobs:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
 
+          # Bark 通知
+          BARK_KEY: ${{ secrets.BARK_KEY }}
+          BARK_GROUP: ${{ secrets.BARK_GROUP }}
+          BARK_ICON: ${{ secrets.BARK_ICON }}
+
           # 可选的环境变量
           TASK_CONFIG: ${{ secrets.TASK_CONFIG }}
           COIN_ADD_NUM: ${{ secrets.COIN_ADD_NUM }}
